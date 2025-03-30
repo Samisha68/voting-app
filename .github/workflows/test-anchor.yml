@@ -25,14 +25,25 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Debug working directory
+        run: ls -la
+
+      - name: Ensure `pnpm-lock.yaml` exists
+        run: |
+          if [ ! -f pnpm-lock.yaml ]; then
+            echo "pnpm-lock.yaml is missing! Generating a new one..."
+            pnpm install --lockfile-only
+            git add pnpm-lock.yaml
+            git commit -m "Auto-generate missing pnpm-lock.yaml"
+            git push
+          fi
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - uses: metadaoproject/setup-anchor@v2
         with:
           anchor-version: '0.30.1'
-          node-version: '20'
-          solana-cli-version: '1.18.9'
 
       - name: Generate new keypair
         run: solana-keygen new --no-bip39-passphrase
