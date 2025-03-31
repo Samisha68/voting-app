@@ -21,26 +21,11 @@ jobs:
           version: 9
           run_install: false
       
-      - name: Debug environment
+      - name: Setup PATH for Node
         run: |
-          node --version
-          npm --version
-          which node
-      
-      - name: Debug working directory
-        run: ls -la
-      
-      - name: Ensure `pnpm-lock.yaml` exists
-        run: |
-          if [ ! -f pnpm-lock.yaml ]; then
-            echo "pnpm-lock.yaml is missing! Generating a new one..."
-            pnpm install --lockfile-only
-            git config --global user.email "github-actions@github.com"
-            git config --global user.name "GitHub Actions"
-            git add pnpm-lock.yaml
-            git commit -m "Auto-generate missing pnpm-lock.yaml"
-            git push
-          fi
+          echo "PATH=$HOME/.local/share/pnpm:$HOME/.nvm/versions/node/v20.*/bin:$PATH" >> $GITHUB_ENV
+          echo "Node path: $(which node)"
+          echo "Node version: $(node --version)"
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -55,13 +40,21 @@ jobs:
       - name: Set solana target cluster to local
         run: solana config set --url http://localhost:8899
       
-      - name: Check solana config
-        run: solana config get
+      - name: Check node and solana config
+        run: |
+          node --version
+          which node
+          solana config get
       
       - name: Build anchor project
-        run: pnpm run anchor build
+        run: |
+          export PATH="$HOME/.nvm/versions/node/v20.*/bin:$PATH"
+          node --version
+          pnpm run anchor build
         shell: bash
       
       - name: Test anchor project
-        run: pnpm run anchor test
+        run: |
+          export PATH="$HOME/.nvm/versions/node/v20.*/bin:$PATH"
+          pnpm run anchor test
         shell: bash
