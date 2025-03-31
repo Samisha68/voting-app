@@ -3,45 +3,36 @@ name: Test and Build Anchor
 on:
   pull_request:
   push:
-    branches: ['main']
+    branches: [ 'main' ]
 
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install latest Rust
-        uses: actions-rs/toolchain@v1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          toolchain: stable
-          override: true
-
-      - name: Force regenerate Cargo.lock
-        run: |
-          cd anchor
-          rm Cargo.lock
-          cargo generate-lockfile
+          version: 9
+          run_install: false
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 7
-          run_install: false
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Setup Solana
-        uses: metadaoproject/setup-anchor@v2
+      - uses: metadaoproject/setup-anchor@v2
         with:
           anchor-version: '0.30.1'
+          node-version: '20'
+          solana-cli-version: '1.18.9'
 
       - name: Generate new keypair
         run: solana-keygen new --no-bip39-passphrase
@@ -49,8 +40,11 @@ jobs:
       - name: Set solana target cluster to local
         run: solana config set --url http://localhost:8899
 
-      - name: Build Anchor project
-        run: pnpm run anchor-build
+      - name: Check solana config
+        run: solana config get
 
-      - name: Test Anchor project
-        run: pnpm run anchor-test
+      - run: pnpm run anchor build
+        shell: bash
+
+      - run: pnpm run anchor test
+        shell: bash
