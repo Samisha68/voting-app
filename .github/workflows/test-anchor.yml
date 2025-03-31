@@ -15,17 +15,16 @@ jobs:
         with:
           node-version: 20
       
+      - name: Check Node version after setup
+        run: |
+          echo "Node path: $(which node)"
+          echo "Node version: $(node --version)"
+      
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      
-      - name: Setup PATH for Node
-        run: |
-          echo "PATH=$HOME/.local/share/pnpm:$HOME/.nvm/versions/node/v20.*/bin:$PATH" >> $GITHUB_ENV
-          echo "Node path: $(which node)"
-          echo "Node version: $(node --version)"
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -40,21 +39,8 @@ jobs:
       - name: Set solana target cluster to local
         run: solana config set --url http://localhost:8899
       
-      - name: Check node and solana config
-        run: |
-          node --version
-          which node
-          solana config get
-      
       - name: Build anchor project
-        run: |
-          export PATH="$HOME/.nvm/versions/node/v20.*/bin:$PATH"
-          node --version
-          pnpm run anchor build
-        shell: bash
+        run: pnpm run anchor build
       
       - name: Test anchor project
-        run: |
-          export PATH="$HOME/.nvm/versions/node/v20.*/bin:$PATH"
-          pnpm run anchor test
-        shell: bash
+        run: pnpm run anchor test
