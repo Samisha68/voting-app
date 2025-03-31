@@ -13,26 +13,21 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16.x'  # Use Node.js v16.x to match what Anchor expects
+          node-version: '16.x'
       
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 7  # Use pnpm v7 which is compatible with Node.js v16
+          version: 7
           run_install: false
       
-      - name: Verify environment
-        run: |
-          node --version
-          pnpm --version
-      
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
       
       - name: Setup Solana
         uses: metadaoproject/setup-anchor@v2
         with:
-          anchor-version: '0.30.1'  # Matches your @coral-xyz/anchor dependency
+          anchor-version: '0.30.1'
       
       - name: Generate new keypair
         run: solana-keygen new --no-bip39-passphrase
