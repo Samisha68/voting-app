@@ -12,10 +12,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install latest Rust
+        uses: actions-rs/toolchain@v1
         with:
-          components: rustfmt, clippy
+          toolchain: stable
+          override: true
+
+      - name: Force regenerate Cargo.lock
+        run: |
+          cd anchor
+          rm Cargo.lock
+          cargo generate-lockfile
 
       - name: Install Node.js
         uses: actions/setup-node@v4
