@@ -6,57 +6,42 @@ on:
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
-    container:
-      image: node:20-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Install system dependencies
-        run: |
-          apt-get update
-          apt-get install -y curl wget git build-essential pkg-config libssl-dev libudev-dev python3
-      
-      - name: Verify Node.js
-        run: |
-          node --version
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16.x'  # Use Node.js v16.x to match what Anchor expects
       
       - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 7  # Use pnpm v7 which is compatible with Node.js v16
+          run_install: false
+      
+      - name: Verify environment
         run: |
-          npm install -g pnpm@9
+          node --version
           pnpm --version
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Setup Solana
+        uses: metadaoproject/setup-anchor@v2
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
+          anchor-version: '0.30.1'  # Matches your @coral-xyz/anchor dependency
       
-      - name: Install Solana CLI
-        run: |
-          sh -c "$(curl -sSfL https://release.solana.com/v1.17.0/install)"
-          export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
-          echo "PATH=$PATH" >> $GITHUB_ENV
-          solana --version
+      - name: Generate new keypair
+        run: solana-keygen new --no-bip39-passphrase
       
-      - name: Install Anchor CLI
-        run: |
-          cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked --force
-          anchor --version
-      
-      - name: Generate Solana keypair
-        run: |
-          mkdir -p ~/.config/solana
-          solana-keygen new --no-bip39-passphrase --force
+      - name: Set solana target cluster to local
+        run: solana config set --url http://localhost:8899
       
       - name: Build Anchor project
-        run: |
-          pnpm run anchor build
+        run: pnpm run anchor-build
       
       - name: Test Anchor project
-        run: |
-          pnpm run anchor test
+        run: pnpm run anchor-test
