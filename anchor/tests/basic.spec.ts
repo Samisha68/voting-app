@@ -19,7 +19,7 @@ describe("Voting", async () => {
   it("initializes a poll", async () => {
     await votingProgram.methods.initializePoll(
       new anchor.BN(1),
-      "What is your favorite color?",
+      "What is your favorite sweet?",
       new anchor.BN(100),
       new anchor.BN(1739370789),
     ).rpc();
@@ -33,25 +33,25 @@ describe("Voting", async () => {
 
   it("initializes candidates", async () => {
     await votingProgram.methods.initializeCandidate(
-      "Pink",
+      "Gulab Jamun",
       new anchor.BN(1),
     ).rpc();
     await votingProgram.methods.initializeCandidate(
-      "Blue",
+      "Rasgulla",
       new anchor.BN(1),
     ).rpc();
-    const [pinkAddress] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Pink")],
+    const [gulabJamunAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Gulab Jamun")],
       votingProgram.programId,
     );
-    const pinkCandidate = await votingProgram.account.candidate.fetch(pinkAddress);
-    console.log(pinkCandidate);
-    const [blueAddress] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Blue")],
+    const gulabJamunCandidate = await votingProgram.account.candidate.fetch(gulabJamunAddress);
+    console.log(gulabJamunCandidate);
+    const [rasgullaAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Rasgulla")],
       votingProgram.programId,
     );
-    const blueCandidate = await votingProgram.account.candidate.fetch(blueAddress);
-    console.log(blueCandidate);
+    const rasgullaCandidate = await votingProgram.account.candidate.fetch(rasgullaAddress);
+    console.log(rasgullaCandidate);
   });
 
   it("vote candidates", async () => {
@@ -63,23 +63,21 @@ describe("Voting", async () => {
       "Rasgulla",
       new anchor.BN(1),
     ).rpc();
-    await votingProgram.methods.vote(
-      "Sweet Potato",
-      new anchor.BN(1),
-    ).rpc();
-    const [pinkAddress] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Pink")],
+    const [gulabJamunAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Gulab Jamun")],
       votingProgram.programId,
     );
-    const pinkCandidate = await votingProgram.account.candidate.fetch(pinkAddress);
-    console.log(pinkCandidate);
-    const [blueAddress] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Blue")],
+    const gulabJamunCandidate = await votingProgram.account.candidate.fetch(gulabJamunAddress);
+    console.log(gulabJamunCandidate);
+    const [rasgullaAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Rasgulla")],
       votingProgram.programId,
     );
-    const blueCandidate = await votingProgram.account.candidate.fetch(blueAddress);
-    console.log(blueCandidate);
-    expect(blueCandidate.candidateVotes.toNumber()).toBe(1);
-    expect(blueCandidate.candidateName).toBe("Blue");
+    const rasgullaCandidate = await votingProgram.account.candidate.fetch(rasgullaAddress);
+    console.log(rasgullaCandidate);
+    expect(rasgullaCandidate.candidateVotes.toNumber()).toBe(1);
+    expect(rasgullaCandidate.candidateName).toBe("Rasgulla");
+    expect(gulabJamunCandidate.candidateVotes.toNumber()).toBe(1);
+    expect(gulabJamunCandidate.candidateName).toBe("Gulab Jamun");
   });
 });
